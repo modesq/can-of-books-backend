@@ -1,21 +1,23 @@
 'use strict';
 
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { response } = require('express');
-require('dotenv').config();
 const mongoose = require('mongoose'); // 0 - import mongoose
 
 const server = express();
 
 server.use(cors()); //make my server open for any request
+server.use(express.json());
 
 //IP : http://localhost:PORT
 
 const PORT = process.env.PORT || 3010;
 
+const mongoURL = process.env.MONGO
 // mongoose config
-mongoose.connect('mongodb://localhost:27017/301d35-books', { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (301d35-books)
+mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: true }); // 1 - connect mongoose with DB (301d35-books)
 
 const bookSchema = new mongoose.Schema({ //define the schema (structure)
   title: String,
@@ -28,29 +30,31 @@ const BookModel = mongoose.model('Book', bookSchema); //compile the schema into 
 //seed data (insert initial data)
 async function seedData() {
   const firstBook = new BookModel({
-    title: "Da Vinci Code",
-    description: "Symbologist Robert Langdon travels from Paris to London to unravel a bizarre murder. Accompanied by a cryptographer, he soon comes across a religious enigma protected by an age-old secret society.",
-    state: "available"
+    title: "Origin",
+    description: "Origin is a 2017 mystery thriller novel by American author Dan Brown and the fifth installment in his Robert Langdon series, following Inferno. The book was released on October 3, 2017, by Doubleday. The book is predominantly set in Spain and features minor sections in Sharjah and Budapest.",
+    status: "available"
   })
 
   const secondBook = new BookModel({
-    title: "Harry Potter and the Deathly Hallows",
-    description: "After Voldemort takes over the Ministry of Magic, Harry, Ron and Hermione are forced into hiding. They try to decipher the clues left to them by Dumbledore to find and destroy Voldemort's Horcruxes.",
-    state: "available"
+    title: "Animal Farm",
+    description: "Animal Farm is a beast fable, in form of satirical allegorical novella, by George Orwell, first published in England on 17 August 1945. It tells the story of a group of farm animals who rebel against their human farmer, hoping to create a society where the animals can be equal, free, and happy.",
+    status: "low stock"
   })
 
   const thirdBook = new BookModel({
-    title: "Life of Pi",
-    description: "Molitor Pi Patel, a Tamil boy from Pondicherry, explores issues of spirituality and practicality from an early age. He survives 227 days after a shipwreck while stranded on a boat in the Pacific Ocean with a Bengal tiger named Richard Parker.",
-    state: "sold-out"
+    title: "Nineteen Eighty-Four",
+    description: "Nineteen Eighty-Four is a dystopian social science fiction novel and cautionary tale written by the English writer George Orwell. It was published on 8 June 1949 by Secker & Warburg as Orwell's ninth and final book completed in his lifetime.",
+    status: "sold-out"
   })
 
   await firstBook.save();
   await secondBook.save();
   await thirdBook.save();
+
+  console.log(secondBook.status);
 }
 
-seedData();
+// seedData();
 
 //Routes
 server.get('/', homeHandler);
@@ -82,7 +86,7 @@ function getBooksHandler(req, res) {
     }
     else {
       console.log(result);
-      res.send.json(result);
+      res.send(result);
     }
   })
 }
