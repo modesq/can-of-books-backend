@@ -61,6 +61,7 @@ server.get('/getBooks', getBooksHandler);
 server.get('*', defualtHandler);
 server.post('/addBooks', addBooksHandler);
 server.delete('/deleteBooks/:id', deleteBookHandler);
+server.put('/updateBooks/:id', updateBookHandler);
 
 
 // http://localhost:3000/
@@ -116,11 +117,25 @@ async function addBooksHandler(req, res) {
 function deleteBookHandler(req, res) {
   const bookID = req.params.id;
   // console.log(req.params.id)
-  BookModel.findByIdAndDelete( bookID , (err, result) => {
+  BookModel.findByIdAndDelete(bookID, (err, result) => {
     if (err) {
       console.log(err);
     } else {
       // console.log(result);
+      res.send(result);
+    }
+  })
+}
+
+// http://localhost:3000/updateBooks/:id
+function updateBookHandler(req, res) {
+  const id = req.params.id;
+  const { title, description, status } = req.body;
+
+  BookModel.findByIdAndUpdate(id, { title, description, status }, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
       res.send(result);
     }
   })
