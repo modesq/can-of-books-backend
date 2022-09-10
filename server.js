@@ -22,7 +22,8 @@ mongoose.connect(`${mongoURL}`, { useNewUrlParser: true, useUnifiedTopology: tru
 const bookSchema = new mongoose.Schema({ //define the schema (structure)
   title: String,
   description: String,
-  status: String
+  status: String,
+  userName: String
 });
 
 const BookModel = mongoose.model('Book', bookSchema); //compile the schema into a model
@@ -32,19 +33,22 @@ async function seedData() {
   const firstBook = new BookModel({
     title: "Origin",
     description: "Origin is a 2017 mystery thriller novel by American author Dan Brown and the fifth installment in his Robert Langdon series, following Inferno. The book was released on October 3, 2017, by Doubleday. The book is predominantly set in Spain and features minor sections in Sharjah and Budapest.",
-    status: "available"
+    status: "available",
+    userName: "Admin"
   })
 
   const secondBook = new BookModel({
     title: "Animal Farm",
     description: "Animal Farm is a beast fable, in form of satirical allegorical novella, by George Orwell, first published in England on 17 August 1945. It tells the story of a group of farm animals who rebel against their human farmer, hoping to create a society where the animals can be equal, free, and happy.",
-    status: "low stock"
+    status: "low stock",
+    userName: "Admin"
   })
 
   const thirdBook = new BookModel({
     title: "Nineteen Eighty-Four",
     description: "Nineteen Eighty-Four is a dystopian social science fiction novel and cautionary tale written by the English writer George Orwell. It was published on 8 June 1949 by Secker & Warburg as Orwell's ninth and final book completed in his lifetime.",
-    status: "sold-out"
+    status: "sold-out",
+    userName: "Admin"
   })
 
   await firstBook.save();
@@ -58,10 +62,10 @@ async function seedData() {
 server.get('/', homeHandler);
 server.get('/test', testHandler);
 server.get('/getBooks', getBooksHandler);
-server.get('*', defualtHandler);
 server.post('/addBooks', addBooksHandler);
 server.delete('/deleteBooks/:id', deleteBookHandler);
 server.put('/updateBooks/:id', updateBookHandler);
+server.get('*', defualtHandler);
 
 
 // http://localhost:3000/
@@ -81,7 +85,8 @@ function defualtHandler(req, res) {
 
 // http://localhost:3000/getBooks
 function getBooksHandler(req, res) {
-  BookModel.find({}, (err, result) => {
+  const userName = req.query.userName
+  BookModel.find({ userName: userName }, (err, result) => {
     if (err) {
       console.log(err);
     }
@@ -94,15 +99,16 @@ function getBooksHandler(req, res) {
 
 // http://localhost:3000/addBooks
 async function addBooksHandler(req, res) {
-  const { title, description, status } = req.body;
+  const { title, description, status, userName } = req.body;
 
   await BookModel.create({
     title: title,
     description: description,
-    status: status
+    status: status,
+    userName: userName
   });
 
-  BookModel.find({}, (err, result) => {
+  BookModel.find({ userName: userName }, (err, result) => {
     if (err) {
       console.log(err);
     }
@@ -116,27 +122,38 @@ async function addBooksHandler(req, res) {
 // http://localhost:3000/deleteBooks/:id
 function deleteBookHandler(req, res) {
   const bookID = req.params.id;
+  const userName = req.query.userName
   // console.log(req.params.id)
-  BookModel.findByIdAndDelete(bookID, (err, result) => {
-    if (err) {
-      console.log(err);
-    } else {
-      // console.log(result);
-      res.send(result);
-    }
+  BookModel.deleteOne({ _id: bookID }, (err, result) => {
+    BookModel.find({ userName: userName }, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        // console.log(result);
+        res.send(result);
+      }
+    })
   })
 }
 
 // http://localhost:3000/updateBooks/:id
 function updateBookHandler(req, res) {
   const id = req.params.id;
-  const { title, description, status } = req.body;
+  const { title, description, status, userName } = req.body;
 
-  BookModel.findByIdAndUpdate(id, { title, description, status }, (err, result) => {
+  BookModel.findByIdAndUpdate(id, { title, description, status, userName }, (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      res.send(result);
+      book.find({ userName: userName }, (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+        else {
+          res.send(result);
+        }
+      })
     }
   })
 
