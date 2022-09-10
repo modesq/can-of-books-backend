@@ -61,11 +61,11 @@ async function seedData() {
 //Routes
 server.get('/', homeHandler);
 server.get('/test', testHandler);
-server.get('/getBooks', getBooksHandler);
-server.post('/addBooks', addBooksHandler);
-server.delete('/deleteBooks/:id', deleteBookHandler);
-server.put('/updateBooks/:id', updateBookHandler);
-server.get('*', defualtHandler);
+server.get('/Books', getBooksHandler);
+server.post('/Books', addBooksHandler);
+server.delete('/Books/:id', deleteBookHandler);
+server.put('/Books/:id', updateBookHandler);
+
 
 
 // http://localhost:3000/
@@ -158,6 +158,8 @@ function updateBookHandler(req, res) {
   })
 
 }
+
+server.get('*', defualtHandler);
 
 // listener
 server.listen(PORT, () => {
